@@ -1,0 +1,174 @@
+{
+  "elementStyling": {
+    "cards": {
+      "selector": ".card, .feature-card, .testimonial-card",
+      "default": {
+        "background": "linear-gradient(180deg, #1E1E2E 0%, #121217 100%)",
+        "border": "1px solid #2A2A3A",
+        "shadow": "0 8px 24px rgba(0, 0, 0, 0.2)",
+        "borderRadius": "12px"
+      },
+      "hover": {
+        "background": "linear-gradient(180deg, #242435 0%, #181822 100%)",
+        "shadow": "0 12px 32px rgba(0, 0, 0, 0.3)"
+      },
+      "icons": {
+        "fill": "#FFFFFF",
+        "background": "transparent",
+        "size": "24px"
+      },
+      "text": {
+        "title": "#F3F3F5",
+        "body": "#C2C2CC",
+        "label": "#8E8EA8"
+      }
+    },
+    "buttons": {
+      "primary": {
+        "selector": ".btn-primary, button.primary, .download-button",
+        "default": {
+          "background": "linear-gradient(90deg, #4E9CF5 0%, #1A73E8 100%)",
+          "text": "#FFFFFF",
+          "iconFill": "#FFFFFF",
+          "borderRadius": "6px",
+          "shadow": "0 4px 12px rgba(26, 115, 232, 0.3)"
+        },
+        "hover": {
+          "background": "linear-gradient(90deg, #3E8BE0 0%, #166ACC 100%)",
+          "shadow": "0 6px 16px rgba(22, 106, 204, 0.35)"
+        },
+        "active": {
+          "background": "linear-gradient(90deg, #166ACC 0%, #0F4A99 100%)",
+          "shadow": "0 2px 6px rgba(15, 74, 153, 0.5)"
+        },
+        "disabled": {
+          "background": "#3A3A4A",
+          "text": "#7A7A8A",
+          "shadow": "none",
+          "cursor": "not-allowed"
+        },
+        "focus": {
+          "outline": "2px solid rgba(78, 156, 245, 0.6)"
+        }
+      },
+      "secondary": {
+        "selector": ".btn-secondary, button.secondary",
+        "default": {
+          "background": "#2A2A3A",
+          "text": "#F3F3F5",
+          "iconFill": "#F3F3F5",
+          "border": "1px solid #3E3E50",
+          "borderRadius": "6px"
+        },
+        "hover": {
+          "background": "#3E3E50",
+          "border": "1px solid #5A5A6A"
+        },
+        "active": {
+          "background": "#292933",
+          "border": "1px solid #4A4A5A"
+        },
+        "disabled": {
+          "background": "#2A2A3A",
+          "text": "#7A7A8A",
+          "border": "1px solid #2A2A3A"
+        },
+        "focus": {
+          "outline": "2px solid rgba(255, 255, 255, 0.3)"
+        }
+      }
+    },
+    "icons": {
+      "nav": {
+        "selector": ".nav-icon, .sidebar-icon",
+        "fill": "#8E8EA8",
+        "background": "none",
+        "hover": {
+          "fill": "#FFFFFF",
+          "background": "rgba(255, 255, 255, 0.1)",
+          "borderRadius": "4px"
+        },
+        "active": {
+          "fill": "#4E9CF5",
+          "background": "rgba(78, 156, 245, 0.2)"
+        }
+      },
+      "action": {
+        "selector": ".icon-action, .btn-icon",
+        "fill": "#FFFFFF",
+        "background": "rgba(78, 156, 245, 0.2)",
+        "hover": {
+          "background": "rgba(78, 156, 245, 0.3)"
+        },
+        "active": {
+          "background": "rgba(78, 156, 245, 0.4)"
+        }
+      }
+    },
+    "text": {
+      "h1": {
+        "selector": "h1, .title-large",
+        "color": "#FFFFFF",
+        "fontWeight": 600
+      },
+      "h2": {
+        "selector": "h2, .title-medium",
+        "color": "#F3F3F5",
+        "fontWeight": 500
+      },
+      "body": {
+        "selector": "p, .body-text",
+        "color": "#C2C2CC",
+        "fontWeight": 400
+      },
+      "caption": {
+        "selector": ".caption, .label-text",
+        "color": "#8E8EA8",
+        "fontWeight": 400
+      }
+    },
+    "backgrounds": {
+      "page": {
+        "selector": "body, .app-background",
+        "background": "#121217"
+      },
+      "hero": {
+        "selector": ".hero-section",
+        "background": "linear-gradient(180deg, #28283A 0%, #121217 75%)"
+      }
+    },
+    "shadows": {
+      "default": {
+        "selector": ".shadow-default",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.2)"
+      },
+      "card": {
+        "selector": ".card",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.2)"
+      }
+    },
+    "borders": {
+      "input": {
+        "selector": "input, textarea",
+        "default": {
+          "border": "1px solid #3E3E50",
+          "borderRadius": "4px"
+        },
+        "focus": {
+          "border": "1px solid #4E9CF5",
+          "outline": "none"
+        }
+      }
+    }
+  },
+  "rules": {
+    "DO_NOT": [
+      "Apply card gradient backgrounds to icons",
+      "Use primary button gradient on secondary or text buttons",
+      "Apply nav-icon hover styles to action icons",
+      "Use text color for backgrounds",
+      "Use shadows on purely decorative inline elements (<span>, <strong>)",
+      "Apply border styles to non-interactive decorative elements"
+    ]
+  }
+}
