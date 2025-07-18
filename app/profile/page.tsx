@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useCombinedAuth, CombinedUser } from "../hooks/useCombinedAuth";
 import { useData } from "../contexts/DataContext";
 import { 
   User, 
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isGoogleUser } = useCombinedAuth();
   const { users } = useData();
 
   // Profile form state
@@ -95,9 +95,11 @@ const Profile = () => {
       // Update user in context
       if (user) {
         await updateUser({
-          ...user,
+          id: user.id,
           name: `${profileForm.firstName} ${profileForm.lastName}`,
           email: profileForm.email,
+          role: user.role as 'admin' | 'manager' | 'employee',
+          avatar: user.avatar,
         });
       }
 
@@ -373,6 +375,161 @@ const Profile = () => {
               </form>
             </div>
           </div>
+
+          {/* Google Profile Information */}
+          {isGoogleUser && user?.image && (
+            <div className="card">
+              <div className="card-header">
+                <div className="flex items-center gap-2">
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: 'linear-gradient(135deg, #4285F4 0%, #34A853 50%, #FBBC05 75%, #EA4335 100%)',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: '#FFFFFF', fontSize: '12px', fontWeight: 'bold' }}>G</span>
+                  </div>
+                  <h3 className="title-medium">Google Profile</h3>
+                </div>
+              </div>
+              <div className="card-content">
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '24px',
+                  padding: '16px',
+                  background: 'rgba(66, 133, 244, 0.05)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(66, 133, 244, 0.2)'
+                }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '3px solid #4285F4',
+                    boxShadow: '0 4px 12px rgba(66, 133, 244, 0.3)'
+                  }}>
+                    <img
+                      src={user.image}
+                      alt={`${user.name}'s profile picture`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = `
+                          <div style="
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            font-size: 24px;
+                            font-weight: bold;
+                          ">
+                            ${getInitials(user.name)}
+                          </div>
+                        `;
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{
+                      color: '#F3F3F5',
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      marginBottom: '8px'
+                    }}>
+                      {user.name}
+                    </h4>
+                    <p style={{
+                      color: '#8E8EA8',
+                      fontSize: '14px',
+                      marginBottom: '4px'
+                    }}>
+                      {user.email}
+                    </p>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '8px'
+                    }}>
+                      <div style={{
+                        padding: '4px 8px',
+                        background: 'rgba(66, 133, 244, 0.1)',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(66, 133, 244, 0.3)'
+                      }}>
+                        <span style={{
+                          color: '#4285F4',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }}>
+                          Google Account
+                        </span>
+                      </div>
+                      <div style={{
+                        padding: '4px 8px',
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(16, 185, 129, 0.3)'
+                      }}>
+                        <span style={{
+                          color: '#10B981',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }}>
+                          {getRoleLabel(user.role)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  marginTop: '16px',
+                  padding: '12px',
+                  background: 'rgba(66, 133, 244, 0.05)',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(66, 133, 244, 0.1)'
+                }}>
+                  <p style={{
+                    color: '#8E8EA8',
+                    fontSize: '13px',
+                    lineHeight: '1.4',
+                    margin: 0
+                  }}>
+                    <strong style={{ color: '#4285F4' }}>Note:</strong> Your profile information is synced from your Google account. 
+                    To update your name or profile picture, please visit your{' '}
+                    <a 
+                      href="https://myaccount.google.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#4285F4',
+                        textDecoration: 'none',
+                        fontWeight: '500'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                    >
+                      Google Account settings
+                    </a>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Work Information */}
           <div className="card">
