@@ -13,6 +13,7 @@ export interface ITeamMember extends Document {
   location?: string;
   skills: string[];
   bio?: string;
+  isGoogleUser?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,6 +79,10 @@ const TeamMemberSchema: Schema = new Schema({
   bio: {
     type: String,
     maxlength: [500, 'Bio cannot be more than 500 characters']
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -87,5 +92,6 @@ const TeamMemberSchema: Schema = new Schema({
 TeamMemberSchema.index({ department: 1 });
 TeamMemberSchema.index({ role: 1 });
 TeamMemberSchema.index({ status: 1 });
+TeamMemberSchema.index({ isGoogleUser: 1 });
 
 export default mongoose.models.TeamMember || mongoose.model<ITeamMember>('TeamMember', TeamMemberSchema); 

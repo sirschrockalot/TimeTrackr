@@ -2,6 +2,7 @@
 
 import { useAuth } from "../contexts/AuthContext";
 import { useSession, signOut } from "next-auth/react";
+import { useEffect } from "react";
 
 export interface CombinedUser {
   id: string;
@@ -56,8 +57,40 @@ export const useCombinedAuth = () => {
   const isLoading = authLoading || status === "loading";
   const isAuthenticatedCombined = isAuthenticated || !!session;
 
+  // Track online status
+  useEffect(() => {
+    if (user && user.email) {
+      // Mark user as online
+      fetch('/api/online-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+    }
+    // Optionally, remove on unmount (tab close)
+    return () => {
+      if (user && user.email) {
+        fetch('/api/online-users', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email })
+        });
+      }
+    };
+    // Only run when user.email changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email]);
+
   // Create a combined logout function that handles both auth methods
   const logout = async () => {
+    if (user && user.email) {
+      // Remove from online users
+      await fetch('/api/online-users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+    }
     if (session?.user) {
       // Logout from NextAuth (Google OAuth)
       await signOut({ callbackUrl: '/login' });

@@ -14,19 +14,26 @@ import {
   Crown,
   Shield,
   User,
+  Mail,
+  Key,
 } from "lucide-react";
 import {
   getTeamMembers,
   deleteTeamMember,
   createTeamMember,
-} from "@/lib/api/teamMembers";
+  updateTeamMember,
+} from "../../lib/api/teamMembers";
+import { useCombinedAuth } from "../hooks/useCombinedAuth";
 
 export default function TeamPage() {
+  const { user: currentUser, isAuthenticated } = useCombinedAuth();
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showManageGoogleUserModal, setShowManageGoogleUserModal] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteForm, setInviteForm] = useState({
@@ -38,16 +45,43 @@ export default function TeamPage() {
     status: "active",
   });
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+  const [googleUserForm, setGoogleUserForm] = useState({
+    email: "",
+    role: "employee",
+    department: "Presidential Digs Real Estate",
+    position: "",
+    status: "active",
+  });
 
-  // Mock user role (replace with real auth context/role check)
-  const userRole = 'admin'; // Change to 'manager' or 'employee' to test restriction
+  // Check if current user is admin
+  const isAdmin = currentUser?.role === 'admin';
 
+  // Fetch team members
   useEffect(() => {
     setLoading(true);
     getTeamMembers()
       .then((res) => setTeamMembers(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Fetch online users
+  useEffect(() => {
+    const fetchOnlineUsers = async () => {
+      try {
+        const res = await fetch('/api/online-users');
+        const data = await res.json();
+        if (data.success) {
+          setOnlineUsers(data.users);
+        }
+      } catch (err) {
+        // Ignore error for now
+      }
+    };
+    fetchOnlineUsers();
+    // Optionally, poll every 10 seconds
+    const interval = setInterval(fetchOnlineUsers, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -64,6 +98,10 @@ export default function TeamPage() {
     setInviteForm({ ...inviteForm, [e.target.name]: e.target.value });
   };
 
+  const handleGoogleUserChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setGoogleUserForm({ ...googleUserForm, [e.target.name]: e.target.value });
+  };
+
   const validateEmail = (email: string) => {
     return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
   };
@@ -75,6 +113,13 @@ export default function TeamPage() {
     inviteForm.role.trim() !== '' &&
     inviteForm.position.trim() !== '' &&
     inviteForm.status.trim() !== '';
+
+  const googleUserFieldsFilled =
+    googleUserForm.email.trim() !== '' &&
+    validateEmail(googleUserForm.email) &&
+    googleUserForm.role.trim() !== '' &&
+    googleUserForm.position.trim() !== '' &&
+    googleUserForm.status.trim() !== '';
 
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +153,73 @@ export default function TeamPage() {
         status: "active",
       });
       setInviteSuccess('Team member invited successfully!');
+      setTimeout(() => setInviteSuccess(null), 3000);
+    } catch (err: any) {
+      setInviteError(err.message);
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleGoogleUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+    
+    if (!googleUserFieldsFilled) {
+      setInviteError('Please fill in all required fields with valid values.');
+      setInviteLoading(false);
+      return;
+    }
+    
+    if (!validateEmail(googleUserForm.email)) {
+      setInviteError('Please enter a valid email address.');
+      setInviteLoading(false);
+      return;
+    }
+
+    try {
+      // Check if user already exists in team members
+      const existingMember = teamMembers.find(m => m.email === googleUserForm.email);
+      
+      if (existingMember) {
+        // Update existing member with new role/position
+        const res = await updateTeamMember(existingMember._id, {
+          role: googleUserForm.role as "employee" | "manager" | "admin",
+          department: googleUserForm.department,
+          position: googleUserForm.position,
+          status: googleUserForm.status as "active" | "inactive" | "pending"
+        });
+        
+        setTeamMembers((prev) => 
+          prev.map(m => m._id === existingMember._id ? res.data : m)
+        );
+        setInviteSuccess('Google user role updated successfully!');
+      } else {
+        // Create new team member record for Google user
+        const res = await createTeamMember({
+          name: `Google User (${googleUserForm.email})`, // Placeholder name
+          email: googleUserForm.email,
+          role: googleUserForm.role as "employee" | "manager" | "admin",
+          department: googleUserForm.department,
+          position: googleUserForm.position,
+          status: googleUserForm.status as "active" | "inactive" | "pending",
+          isGoogleUser: true
+        });
+        
+        setTeamMembers((prev) => [res.data, ...prev]);
+        setInviteSuccess('Google user added to team successfully!');
+      }
+      
+      setShowManageGoogleUserModal(false);
+      setGoogleUserForm({
+        email: "",
+        role: "employee",
+        department: "Presidential Digs Real Estate",
+        position: "",
+        status: "active",
+      });
       setTimeout(() => setInviteSuccess(null), 3000);
     } catch (err: any) {
       setInviteError(err.message);
@@ -170,6 +282,9 @@ export default function TeamPage() {
     employees: teamMembers.filter((m) => m.role === "employee").length,
   };
 
+  // Helper to determine if a member is online
+  const isMemberOnline = (member: any) => onlineUsers.includes(member.email);
+
   if (loading) return <div>Loading team members...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
 
@@ -179,14 +294,21 @@ export default function TeamPage() {
       <div className="page-header">
         <h1 className="title-large">Team Management</h1>
         <p className="body-text">Manage your team members, roles, and permissions</p>
-        {userRole === 'admin' && (
-          <button
-            className="btn btn-primary"
-            style={{ float: "right", marginTop: -48 }}
-            onClick={() => setShowInviteModal(true)}
-          >
-            <UserPlus size={16} /> Invite Member
-          </button>
+        {isAdmin && (
+          <div style={{ float: "right", marginTop: -48, display: "flex", gap: 12 }}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowManageGoogleUserModal(true)}
+            >
+              <Key size={16} /> Manage Google User
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowInviteModal(true)}
+            >
+              <UserPlus size={16} /> Invite Member
+            </button>
+          </div>
         )}
       </div>
       {inviteSuccess && (
@@ -288,12 +410,30 @@ export default function TeamPage() {
                             height: 40,
                             backgroundColor: member.avatarColor || "#4E9CF5",
                             marginRight: 16,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontSize: 14,
+                            fontWeight: 500,
                           }}
                         >
-                          {member.avatar || member.name?.split(" ").map((n: string) => n[0]).join("")}
+                          {member.isGoogleUser ? (
+                            <Key size={16} />
+                          ) : (
+                            member.avatar || member.name?.split(" ").map((n: string) => n[0]).join("")
+                          )}
                         </div>
                         <div>
-                          <div className="body-text" style={{ color: "#F3F3F5", fontWeight: 500 }}>{member.name}</div>
+                          <div className="body-text" style={{ color: "#F3F3F5", fontWeight: 500 }}>
+                            {member.name}
+                            {member.isGoogleUser && (
+                              <span style={{ marginLeft: 8, fontSize: 12, color: "#F59E0B" }}>
+                                (Google)
+                              </span>
+                            )}
+                          </div>
                           <div className="label-text">{member.email}</div>
                         </div>
                       </div>
@@ -313,14 +453,14 @@ export default function TeamPage() {
                     </td>
                     <td style={tdStyle}>
                       <div className="flex items-center gap-2">
-                        {getStatusIcon(member.status)}
+                        {getStatusIcon(isMemberOnline(member) ? "active" : "inactive")}
                         <span className="label-text" style={{
-                          color: getStatusColor(member.status),
+                          color: getStatusColor(isMemberOnline(member) ? "active" : "inactive"),
                           fontSize: 12,
                           fontWeight: 500,
                           textTransform: "capitalize"
                         }}>
-                          {member.status}
+                          {isMemberOnline(member) ? "active" : "inactive"}
                         </span>
                       </div>
                     </td>
@@ -339,13 +479,15 @@ export default function TeamPage() {
                         >
                           <Edit size={14} />
                         </button>
-                        <button
-                          className="btn btn-secondary"
-                          style={{ padding: "4px 8px", fontSize: 12, color: "#EF4444" }}
-                          onClick={() => handleDelete(member._id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            className="btn btn-secondary"
+                            style={{ padding: "4px 8px", fontSize: 12, color: "#EF4444" }}
+                            onClick={() => handleDelete(member._id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -383,7 +525,7 @@ export default function TeamPage() {
       </div>
 
       {/* Invite Member Modal */}
-      {showInviteModal && userRole === 'admin' && (
+      {showInviteModal && isAdmin && (
         <div
           style={{
             position: "fixed",
@@ -468,6 +610,7 @@ export default function TeamPage() {
                 style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
               >
                 <option value="">Select a position</option>
+                <option value="Owner">Owner</option>
                 <option value="Acquisition Manager">Acquisition Manager</option>
                 <option value="Lead Manager">Lead Manager</option>
                 <option value="Dispositions Manager">Dispositions Manager</option>
@@ -504,6 +647,129 @@ export default function TeamPage() {
                 disabled={inviteLoading || !requiredFieldsFilled}
               >
                 {inviteLoading ? "Inviting..." : "Invite"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Manage Google User Modal */}
+      {showManageGoogleUserModal && isAdmin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setShowManageGoogleUserModal(false)}
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleGoogleUserSubmit}
+            style={{
+              background: "#1E1E2E",
+              borderRadius: 12,
+              padding: 32,
+              minWidth: 340,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              color: "#F3F3F5",
+            }}
+          >
+            <h2 style={{ marginBottom: 16 }}>Manage Google OAuth User</h2>
+            <p style={{ marginBottom: 16, fontSize: 14, color: "#8E8EA8" }}>
+              Assign roles and permissions to Google OAuth users
+            </p>
+            {inviteError && <div style={{ color: "#EF4444", marginBottom: 8 }}>{inviteError}</div>}
+            <div style={{ marginBottom: 12 }}>
+              <label>Google User Email</label>
+              <input
+                name="email"
+                type="email"
+                value={googleUserForm.email}
+                onChange={handleGoogleUserChange}
+                required
+                placeholder="user@gmail.com"
+                style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label>Role</label>
+              <select
+                name="role"
+                value={googleUserForm.role}
+                onChange={handleGoogleUserChange}
+                required
+                style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
+              >
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label>Department</label>
+              <input
+                name="department"
+                value={googleUserForm.department}
+                onChange={handleGoogleUserChange}
+                required
+                style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
+              />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label>Position</label>
+              <select
+                name="position"
+                value={googleUserForm.position}
+                onChange={handleGoogleUserChange}
+                required
+                style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
+              >
+                <option value="">Select a position</option>
+                <option value="Owner">Owner</option>
+                <option value="Acquisition Manager">Acquisition Manager</option>
+                <option value="Lead Manager">Lead Manager</option>
+                <option value="Dispositions Manager">Dispositions Manager</option>
+                <option value="Dispo Lead">Dispo Lead</option>
+                <option value="Transaction Coordinator">Transaction Coordinator</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label>Status</label>
+              <select
+                name="status"
+                value={googleUserForm.status}
+                onChange={handleGoogleUserChange}
+                required
+                style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #2A2A3A", background: "#242435", color: "#F3F3F5" }}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowManageGoogleUserModal(false)}
+                disabled={inviteLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={inviteLoading || !googleUserFieldsFilled}
+              >
+                {inviteLoading ? "Processing..." : "Assign Role"}
               </button>
             </div>
           </form>

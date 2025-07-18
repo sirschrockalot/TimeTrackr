@@ -13,6 +13,7 @@ export interface CreateTeamMemberData {
   skills?: string[];
   bio?: string;
   avatar?: string;
+  isGoogleUser?: boolean;
 }
 
 export interface UpdateTeamMemberData extends Partial<CreateTeamMemberData> {}
