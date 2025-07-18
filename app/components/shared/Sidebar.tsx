@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Home, Clock, Folder, BarChart, Users, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useCombinedAuth } from "../../hooks/useCombinedAuth";
 import { useLayout } from "../../contexts/LayoutContext";
 
 const navItems = [
@@ -18,7 +18,7 @@ const navItems = [
 const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user } = useCombinedAuth();
   const { isSidebarCollapsed, setIsSidebarCollapsed } = useLayout();
 
   const handleNavClick = () => {
@@ -113,7 +113,26 @@ const Sidebar = () => {
             className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "space-x-3"} hover:bg-[#242435] rounded-md p-2 transition-colors`}
           >
             <div className="user-avatar">
-              {user ? getInitials(user.name) : "JD"}
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={`${user.name}'s profile picture`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    // Fallback to initials if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = user ? getInitials(user.name) : "JD";
+                  }}
+                />
+              ) : (
+                user ? getInitials(user.name) : "JD"
+              )}
             </div>
             {!isSidebarCollapsed && (
               <div className="user-info">
