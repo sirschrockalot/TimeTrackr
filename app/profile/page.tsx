@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useCombinedAuth, CombinedUser } from "../hooks/useCombinedAuth";
 import { useData } from "../contexts/DataContext";
-import AuthDebug from "../components/debug/AuthDebug";
 import { 
   User, 
   Settings, 
@@ -191,13 +190,7 @@ const Profile = () => {
     }
   };
 
-  // Debug logging
-  console.log('Profile Page Debug:', {
-    user,
-    isGoogleUser,
-    userImage: user?.image,
-    shouldShowGoogleProfile: isGoogleUser && user?.image
-  });
+
 
   if (!user) {
     return (
@@ -211,7 +204,6 @@ const Profile = () => {
 
   return (
     <div className="page-content">
-      <AuthDebug />
       {/* Page Header */}
       <div className="page-header">
         <h1 className="title-large">Profile & Settings</h1>
@@ -387,9 +379,7 @@ const Profile = () => {
           </div>
 
           {/* Google Profile Information */}
-          {/* Debug: isGoogleUser={isGoogleUser}, user?.image={user?.image} */}
-          {/* Temporarily showing for debugging */}
-          {user && (
+          {isGoogleUser && user?.image && (
             <div className="card">
               <div className="card-header">
                 <div className="flex items-center gap-2">

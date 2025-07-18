@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import { Search, Bell, User, Settings, LogOut, Sun, Moon, Menu, ChevronDown } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useCombinedAuth } from "../../hooks/useCombinedAuth";
 
 interface Breadcrumb {
   label: string;
@@ -16,7 +16,7 @@ interface Breadcrumb {
 const Header = () => {
   const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout } = useCombinedAuth();
   const userMenuRef = React.useRef<HTMLDivElement>(null);
 
   // Generate breadcrumbs based on current path
@@ -101,7 +101,26 @@ const Header = () => {
               aria-label="User menu"
             >
               <div className="user-menu-avatar">
-                {user ? getInitials(user.name) : "JD"}
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt={`${user.name}'s profile picture`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = user ? getInitials(user.name) : "JD";
+                    }}
+                  />
+                ) : (
+                  user ? getInitials(user.name) : "JD"
+                )}
               </div>
               <span>{user ? user.name : "John Doe"}</span>
               <ChevronDown
@@ -143,9 +162,28 @@ const Header = () => {
                   color: 'white',
                   fontSize: '14px',
                   fontWeight: '600',
-                  marginRight: '12px'
+                  marginRight: '12px',
+                  overflow: 'hidden'
                 }}>
-                  {user ? getInitials(user.name) : "JD"}
+                  {user?.image ? (
+                    <img
+                      src={user.image}
+                      alt={`${user.name}'s profile picture`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = user ? getInitials(user.name) : "JD";
+                      }}
+                    />
+                  ) : (
+                    user ? getInitials(user.name) : "JD"
+                  )}
                 </div>
                 <div>
                   <div style={{ color: '#F3F3F5', fontWeight: '500', fontSize: '14px' }}>
