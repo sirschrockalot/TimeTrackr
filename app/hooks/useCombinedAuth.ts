@@ -17,9 +17,19 @@ export const useCombinedAuth = () => {
   const { user: authUser, isAuthenticated, isLoading: authLoading, ...authContext } = useAuth();
   const { data: session, status } = useSession();
 
+  // Debug logging
+  console.log('useCombinedAuth Debug:', {
+    session,
+    status,
+    authUser,
+    isAuthenticated,
+    authLoading
+  });
+
   // Determine which user data to use
   const user: CombinedUser | null = (() => {
     if (session?.user) {
+      console.log('Using NextAuth session user:', session.user);
       // NextAuth session takes precedence (Google OAuth)
       return {
         id: session.user.id || session.user.email || 'unknown',
@@ -31,6 +41,7 @@ export const useCombinedAuth = () => {
         isGoogleUser: true,
       };
     } else if (authUser) {
+      console.log('Using AuthContext user:', authUser);
       // Fall back to AuthContext user (traditional login)
       return {
         ...authUser,
@@ -38,6 +49,7 @@ export const useCombinedAuth = () => {
         isGoogleUser: false,
       };
     }
+    console.log('No user found');
     return null;
   })();
 

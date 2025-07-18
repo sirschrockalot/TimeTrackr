@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useCombinedAuth, CombinedUser } from "../hooks/useCombinedAuth";
 import { useData } from "../contexts/DataContext";
+import AuthDebug from "../components/debug/AuthDebug";
 import { 
   User, 
   Settings, 
@@ -202,6 +203,7 @@ const Profile = () => {
 
   return (
     <div className="page-content">
+      <AuthDebug />
       {/* Page Header */}
       <div className="page-header">
         <h1 className="title-large">Profile & Settings</h1>
