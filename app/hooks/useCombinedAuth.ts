@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "../contexts/AuthContext";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 export interface CombinedUser {
   id: string;
@@ -56,11 +56,29 @@ export const useCombinedAuth = () => {
   const isLoading = authLoading || status === "loading";
   const isAuthenticatedCombined = isAuthenticated || !!session;
 
+  // Create a combined logout function that handles both auth methods
+  const logout = async () => {
+    if (session?.user) {
+      // Logout from NextAuth (Google OAuth)
+      await signOut({ callbackUrl: '/login' });
+    } else {
+      // Logout from AuthContext (traditional login)
+      authContext.logout();
+    }
+  };
+
   return {
     user,
     isAuthenticated: isAuthenticatedCombined,
     isLoading,
     isGoogleUser: !!session?.user,
-    ...authContext,
+    logout,
+    // Include other auth context methods but exclude the original logout
+    login: authContext.login,
+    register: authContext.register,
+    loginAsDemo: authContext.loginAsDemo,
+    clearError: authContext.clearError,
+    hasPermission: authContext.hasPermission,
+    updateUser: authContext.updateUser,
   };
 }; 
