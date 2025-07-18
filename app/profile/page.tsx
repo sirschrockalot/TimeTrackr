@@ -191,6 +191,14 @@ const Profile = () => {
     }
   };
 
+  // Debug logging
+  console.log('Profile Page Debug:', {
+    user,
+    isGoogleUser,
+    userImage: user?.image,
+    shouldShowGoogleProfile: isGoogleUser && user?.image
+  });
+
   if (!user) {
     return (
       <div className="page-content">
@@ -379,7 +387,9 @@ const Profile = () => {
           </div>
 
           {/* Google Profile Information */}
-          {isGoogleUser && user?.image && (
+          {/* Debug: isGoogleUser={isGoogleUser}, user?.image={user?.image} */}
+          {/* Temporarily showing for debugging */}
+          {user && (
             <div className="card">
               <div className="card-header">
                 <div className="flex items-center gap-2">
