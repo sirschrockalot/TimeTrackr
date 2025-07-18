@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { DataProvider } from "./contexts/DataContext";
 import { LayoutProvider } from "./contexts/LayoutContext";
 import AuthGuard from "./components/auth/AuthGuard";
+import SessionProvider from "./components/auth/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,15 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider>
-          <DataProvider>
-            <LayoutProvider>
-              <AuthGuard>
-                {children}
-              </AuthGuard>
-            </LayoutProvider>
-          </DataProvider>
-        </AuthProvider>
+        <SessionProvider>
+          <AuthProvider>
+            <DataProvider>
+              <LayoutProvider>
+                <AuthGuard>
+                  {children}
+                </AuthGuard>
+              </LayoutProvider>
+            </DataProvider>
+          </AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );

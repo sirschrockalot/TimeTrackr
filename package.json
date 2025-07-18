@@ -10,6 +10,7 @@
     "unocss:generate": "unocss ./app/**/*.{js,ts,jsx,tsx} --out-file ./app/unocss.css"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^3.10.0",
     "@unocss/preset-icons": "^66.3.3",
     "@unocss/preset-uno": "^66.3.3",
     "@unocss/preset-web-fonts": "^66.3.3",
@@ -18,6 +19,7 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.3",
     "next": "15.3.5",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.1.0",

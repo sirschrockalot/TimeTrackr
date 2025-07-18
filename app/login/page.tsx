@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../contexts/AuthContext";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -136,6 +137,22 @@ export default function LoginPage() {
             </span>
           </div>
         </form>
+
+        {/* Google Sign In */}
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#2A2A3A]" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-[#121217] text-[#8E8EA8]">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <GoogleSignInButton disabled={isLoading} />
+          </div>
+        </div>
 
         {/* Demo Login */}
         <div className="mt-6">
