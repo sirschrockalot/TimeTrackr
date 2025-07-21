@@ -197,39 +197,41 @@ const Header = () => {
             </div>
             {/* Menu Items */}
             <div style={{ padding: '4px 0' }}>
-              <Link
-                href="/profile"
-                onClick={() => setIsUserMenuOpen(false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  color: '#C2C2CC',
-                  textDecoration: 'none',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#242435'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <User size={16} style={{ marginRight: '12px' }} />
-                <span>Profile</span>
+              <Link href="/profile" legacyBehavior>
+                <a
+                  onClick={() => setIsUserMenuOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    color: '#C2C2CC',
+                    textDecoration: 'none',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#242435'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <User size={16} style={{ marginRight: '12px' }} />
+                  <span>Profile</span>
+                </a>
               </Link>
-              <Link
-                href="/profile"
-                onClick={() => setIsUserMenuOpen(false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  color: '#C2C2CC',
-                  textDecoration: 'none',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#242435'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <Settings size={16} style={{ marginRight: '12px' }} />
-                <span>Settings</span>
+              <Link href="/profile" legacyBehavior>
+                <a
+                  onClick={() => setIsUserMenuOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    color: '#C2C2CC',
+                    textDecoration: 'none',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#242435'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <Settings size={16} style={{ marginRight: '12px' }} />
+                  <span>Settings</span>
+                </a>
               </Link>
             </div>
             {/* Divider */}

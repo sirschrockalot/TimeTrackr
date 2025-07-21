@@ -13,6 +13,7 @@ const navItems = [
   { label: "Projects", icon: Folder, href: "/projects", roles: ["admin", "manager"] },
   { label: "Reports", icon: BarChart, href: "/reports", roles: ["admin", "manager"] },
   { label: "Team", icon: Users, href: "/team", roles: ["admin", "manager"] },
+  { label: "KPI", icon: BarChart, href: "/kpi", roles: ["admin", "manager"] },
 ];
 
 const Sidebar = () => {
